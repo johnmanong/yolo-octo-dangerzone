@@ -35,7 +35,8 @@ def is_file_for_pants(file_path):
 
   return file_name_and_ext != __file__ \
          and os.path.isfile(file_path) \
-         and file_ext == '.py'
+         and file_ext == '.py' \
+         and not file_name_and_ext.startswith('__')
 
 def build_pants_target(file_info):
   def _wrap_quotes(str):
