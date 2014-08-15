@@ -7,7 +7,7 @@ from string import Template
 
 
 PANTS_TARGET_TEMPLATE = Template(
-    'python_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n\n)')
+    'python_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
 
 
 def parse_for_pants(file_path):
