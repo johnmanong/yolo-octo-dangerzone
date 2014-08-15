@@ -15,7 +15,7 @@ def parse_for_pants(file_path):
     sources = []
 
     file_name_and_ext = os.path.basename(file_path)
-    file_name,_ = os.path.splitext(file_name_and_ext)
+    file_name, _ = os.path.splitext(file_name_and_ext)
 
     sources.append(file_name_and_ext)
 
