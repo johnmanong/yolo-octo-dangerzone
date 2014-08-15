@@ -1,10 +1,11 @@
 import autopep8
 import argparse
 import os
+import re
 from string import Template
 
 
-PANTS_TARGET_TEMPLATE = Template('python_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)')
+PANTS_TARGET_TEMPLATE = Template('python_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n\n)')
 
 def parse_for_pants(file_path):
   dependencies = []
@@ -19,7 +20,7 @@ def parse_for_pants(file_path):
     content = f.readlines()
     for line in content:
       line = line.strip()
-      if not line.startswith('#') and 'import' in line:
+      if not line.startswith('#') and re.match(r'.*\bimport\b.*', line):
         dependencies.append('# ' + line) # add comment for now to help resolve
 
   return {

@@ -8,6 +8,11 @@ from django.core.exceptions import MiddlewareNotUsed
 
 from django_pdb.utils import get_ipdb, has_ipdb
 
+# test
+import important
+
+class importantStuff(object):
+
 
 class PdbMiddleware(object):
     """
