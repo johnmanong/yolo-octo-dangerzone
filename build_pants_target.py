@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import autopep8
 import argparse
 import os
