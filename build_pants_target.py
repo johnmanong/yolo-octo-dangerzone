@@ -14,12 +14,12 @@ def parse_for_pants(file_path):
     sources = []
 
     file_name_and_ext = os.path.basename(file_path)
-    file_name, file_ext = os.path.splitext(file_name_and_ext)
+    file_name,_ = os.path.splitext(file_name_and_ext)
 
     sources.append(file_name_and_ext)
 
-    with open(file_path) as f:
-        content = f.readlines()
+    with open(file_path) as file_to_parse:
+        content = file_to_parse.readlines()
         for line in content:
             line = line.strip()
             if not line.startswith('#') and re.match(r'.*\bimport\b.*', line):
@@ -35,7 +35,7 @@ def parse_for_pants(file_path):
 
 def is_file_for_pants(file_path):
     file_name_and_ext = os.path.basename(file_path)
-    file_name, file_ext = os.path.splitext(file_name_and_ext)
+    _, file_ext = os.path.splitext(file_name_and_ext)
 
     return file_name_and_ext != __file__ \
         and os.path.isfile(file_path) \
@@ -44,8 +44,8 @@ def is_file_for_pants(file_path):
 
 
 def build_pants_target(file_info):
-    def _wrap_quotes(str):
-        return "'" + str + "'"
+    def _wrap_quotes(string):
+        return "'" + string + "'"
 
     name = _wrap_quotes(file_info['name'])
     sources = ", ".join([_wrap_quotes(source)
@@ -63,8 +63,8 @@ def process_files_for_pants(rootdir):
     with open(rootdir + '/BUILD', 'a') as build_file:
         file_infos = []
 
-        for file in os.listdir(rootdir):
-            file_path = rootdir + '/' + file
+        for file_name in os.listdir(rootdir):
+            file_path = rootdir + '/' + file_name
             if is_file_for_pants(file_path):
                 file_infos.append(parse_for_pants(file_path))
             else:
