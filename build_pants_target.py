@@ -7,7 +7,7 @@ from string import Template
 
 
 PANTS_TARGET_TEMPLATE = Template(
-    'python_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
+    '\npython_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
 
 
 def parse_for_pants(file_path):
@@ -26,9 +26,9 @@ def parse_for_pants(file_path):
             if not line.startswith('#') and re.match(r'.*\bimport\b.*', line):
                 # add comment for now to help resolve
                 dependencies.append('# ' + line)
-                # add build target boiler plate
-                build_target_boiler = "'',"
-                dependencies.append(build_target_boiler)
+                # TODO add build target boiler plate
+                #build_target_boiler = "'',"
+                #dependencies.append(build_target_boiler)
 
     return {
         'name': file_name,
