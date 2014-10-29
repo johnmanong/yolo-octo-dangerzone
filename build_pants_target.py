@@ -4,10 +4,23 @@ import argparse
 import os
 import re
 from string import Template
+from target_mapping import PANTS_TARGET_MAPPING
 
 
 PANTS_TARGET_TEMPLATE = Template(
     '\npython_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
+
+
+def get_target_for_import(import_statement):
+    # split import statement into fragements
+    frags = import_statement.split(' ')
+
+    # remove non-module keywords
+    frags = [frag for frag in frags if frag not in ['from', 'import']]
+
+    # check config for targets
+    mapped_frags = map(lambda x: PANTS_TARGET_MAPPING.get(x), frags)
+    return next((item for item in mapped_frags if item is not None), None)
 
 
 def parse_for_pants(file_path):
@@ -24,11 +37,18 @@ def parse_for_pants(file_path):
         for line in content:
             line = line.strip()
             if not line.startswith('#') and re.match(r'.*\bimport\b.*', line):
-                # add comment for now to help resolve
-                dependencies.append('# ' + line)
-                # TODO add build target boiler plate
-                #build_target_boiler = "'',"
-                #dependencies.append(build_target_boiler)
+
+                # check known targets for match
+                target_path = get_target_for_import(line)
+
+                if target_path is not None:
+                    # match found, mark as matched and add target path
+                    dependencies.append('# (match) %s' % line)
+                    dependencies.append("'%s'," % target_path)
+                else:
+                    # add comment for now to help resolve
+                    dependencies.append('# %s' % line)
+
 
     return {
         'name': file_name,
