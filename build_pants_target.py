@@ -19,8 +19,10 @@ def get_target_for_import(import_statement):
     frags = [frag for frag in frags if frag not in ['from', 'import']]
 
     # check config for targets
-    mapped_frags = map(lambda x: PANTS_TARGET_MAPPING.get(x), frags)
-    return next((item for item in mapped_frags if item is not None), None)
+    matches = [PANTS_TARGET_MAPPING.get(frag) for frag in frags if frag in PANTS_TARGET_MAPPING]
+
+    # return if matches found
+    return matches[0] if matches else None
 
 
 def parse_for_pants(file_path):
@@ -48,7 +50,6 @@ def parse_for_pants(file_path):
                 else:
                     # add comment for now to help resolve
                     dependencies.append('# %s' % line)
-
 
     return {
         'name': file_name,
