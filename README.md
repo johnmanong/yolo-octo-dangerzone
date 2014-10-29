@@ -12,5 +12,6 @@ Tool tries to assist with import to target resolution by dropping a comments int
 `$ build_pants_target.py <dir>`
 
 ## Structure:
- |-- build_pants_target.py: build script
- |-- target_mapping.py: dict with common mappings between import statements and target paths
+
+    |-- build_pants_target.py: build script
+    |-- target_mapping.py: dict with common mappings between import statements and target paths
