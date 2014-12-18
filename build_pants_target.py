@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import autopep8
 import argparse
+import logging
 import os
 import re
 from string import Template
 from target_mapping import PANTS_TARGET_MAPPING
+
+logger = logging.getLevelName(__name__)
 
 
 PANTS_TARGET_TEMPLATE = Template(
@@ -70,7 +73,7 @@ def is_file_for_pants(file_path):
 
 def build_pants_target(file_info):
     def _wrap_quotes(string):
-        return "'" + string + "'"
+        return "'%s'" % string
 
     name = _wrap_quotes(file_info['name'])
     sources = ", ".join([_wrap_quotes(source)
@@ -84,12 +87,14 @@ def build_pants_target(file_info):
     ))
 
 
-def process_files_for_pants(rootdir):
-    with open(rootdir + '/BUILD', 'a') as build_file:
+def process_dir_for_pants(target_dir, files=None):
+    files = files or os.listdir(target_dir)
+
+    with open(target_dir + '/BUILD', 'a') as build_file:
         file_infos = []
 
-        for file_name in os.listdir(rootdir):
-            file_path = rootdir + '/' + file_name
+        for file_name in files:
+            file_path = target_dir + '/' + file_name
             if is_file_for_pants(file_path):
                 file_infos.append(parse_for_pants(file_path))
             else:
@@ -99,10 +104,24 @@ def process_files_for_pants(rootdir):
             build_file.write(build_pants_target(file_info))
 
 
+def process_files_for_pants(file_target):
+    if os.path.isfile(file_target):
+        dir = os.path.dirname(file_target)
+        files = [os.path.basename(file_target)]
+        process_dir_for_pants(target_dir=dir, files=files)
+    elif os.path.isdir(file_target):
+        process_dir_for_pants(file_target)
+    else:
+        logger('Cannot process argument %s', file_target)
+
+
+
+
+
 # get as arg
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    'target_dir', help='full path to process for pants BUILD', action='append')
+    'files_to_build', help='full path to process for pants BUILD', action='append')
 
-for target_dir in parser.parse_args().target_dir:
-    process_files_for_pants(target_dir)
+for files_to_build in parser.parse_args().files_to_build:
+    process_files_for_pants(files_to_build)
