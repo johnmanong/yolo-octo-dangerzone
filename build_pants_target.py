@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 import autopep8
 import argparse
-import logging
 import os
 import re
 from string import Template
 from target_mapping import PANTS_TARGET_MAPPING
 
-logger = logging.getLevelName(__name__)
-
 
 PANTS_TARGET_TEMPLATE = Template(
     '\npython_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
+
+DOUBLE_DIR_STRUCTURE = True
 
 
 def get_target_for_import(import_statement):
@@ -26,6 +25,64 @@ def get_target_for_import(import_statement):
 
     # return if matches found
     return matches[0] if matches else None
+
+
+def get_module_name_for_import(import_statement):
+    # assumes import statements are in one of the following forms
+    #   import <module name>
+    #   from <module name> import <something>
+
+    frags = import_statement.split(' ')
+    try:
+        return frags[frags.index('from') + 1]
+    except ValueError:
+        pass
+
+    try:
+        return frags[frags.index('import') + 1]
+    except ValueError:
+        print 'died trying to get module name for import statement: %s ' % import_statement
+
+    return None
+
+
+def get_pants_target_path_for_import(import_statement):
+    module_name = get_module_name_for_import(import_statement)
+
+    if not module_name:
+        return None
+
+    # NOT WORKING
+    # try:
+    #     file_path = os.path.abspath(__import__(module_name).__file__)
+    # except (AttributeError, ImportError):
+    #     print 'could not resolve %s directly' % import_statement
+
+    # get module path and name
+    module_name_frags = module_name.split('.')
+    import_target_name = module_name_frags.pop()
+    module_path = ''
+    if module_name_frags:
+        double_root_module_name = module_name_frags
+        double_root_module_name.insert(0, double_root_module_name[0])
+        module_path = '/'.join(double_root_module_name)
+
+    # construct and verify build file
+    build_file_path_frags = module_name_frags
+    build_file_path_frags.append('BUILD')
+    build_file_path = '/'.join(build_file_path_frags)
+
+    # make sure build file exists
+    if not os.path.isfile(build_file_path):
+        print 'could not find build file at %s' % build_file_path
+        return None
+
+    # verify there is a build target already defined
+    if not import_target_name in open(build_file_path).read():
+        print 'could not find target name %s in build file %s' % (import_target_name, build_file_path)
+        return None
+
+    return '%s:%s' % (module_path, import_target_name)
 
 
 def parse_for_pants(file_path):
@@ -45,14 +102,19 @@ def parse_for_pants(file_path):
 
                 # check known targets for match
                 target_path = get_target_for_import(line)
+                found_target_path = get_pants_target_path_for_import(line)
 
                 if target_path is not None:
                     # match found, mark as matched and add target path
-                    dependencies.append('# (match) %s' % line)
+                    dependencies.append('# (SUCCESS: match from target mapping) %s' % line)
                     dependencies.append("'%s'," % target_path)
+                elif found_target_path is not None:
+                    # found a match
+                    dependencies.append('# (SUCCESS: found build target) %s' % line)
+                    dependencies.append("'%s'," % found_target_path)
                 else:
-                    # add comment for now to help resolve
-                    dependencies.append('# %s' % line)
+                    dependencies.append('# (FAIL: could not find build target for %s)' % line)
+                    dependencies.append("#%s" % line)
 
     return {
         'name': file_name,

@@ -11,3 +11,23 @@ python_library(
         # from django_pdb.utils import get_ipdb, has_ipdb
     ]
 )
+
+python_library(
+    name='middleware2',
+    sources=['middleware2.py'],
+    dependencies=[
+        # (found) import inspect
+        '',
+        # (found) import os
+        '',
+        # (found) import pdb
+        '',
+        #import sys
+        # (found) from django.conf import settings
+        '',
+        # (found) from django.core.exceptions import MiddlewareNotUsed
+        '',
+        # (match) from django_pdb.utils import get_ipdb, has_ipdb
+        'test/path/to:target',
+    ]
+)
