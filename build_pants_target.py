@@ -45,6 +45,21 @@ def get_module_name_for_import(import_statement):
 
     return None
 
+def can_import_from_python(module_name):
+    """
+    Utility method to check if import can come from python lib and not virtual env
+    """
+    try:
+        # WIP
+        # print '>>>>>>>>>>>>>>>>>>>>>>>>>'
+        # print module_name
+        os.path.abspath(__import__(module_name).__file__)
+        # __import__(module_name)
+    except (AttributeError, ImportError):
+        return False
+
+    # return True
+    return False
 
 def get_pants_target_path_for_import(import_statement):
     module_name = get_module_name_for_import(import_statement)
@@ -52,11 +67,9 @@ def get_pants_target_path_for_import(import_statement):
     if not module_name:
         return None
 
-    # NOT WORKING
-    # try:
-    #     file_path = os.path.abspath(__import__(module_name).__file__)
-    # except (AttributeError, ImportError):
-    #     print 'could not resolve %s directly' % import_statement
+    # check if module already exists
+    if can_import_from_python(module_name):
+        return ''
 
     # get module path and name
     module_name_frags = module_name.split('.')
@@ -109,10 +122,12 @@ def parse_for_pants(file_path):
                     # match found, mark as matched and add target path
                     dependencies.append('# (SUCCESS: match from target mapping) %s' % line)
                     dependencies.append("'%s'," % target_path)
-                elif found_target_path is not None:
+                elif found_target_path:
                     # found a match
                     dependencies.append('# (SUCCESS: found build target) %s' % line)
                     dependencies.append("'%s'," % found_target_path)
+                elif found_target_path == '':
+                    dependencies.append('# (PASS: found was able to import) %s' % line)
                 else:
                     dependencies.append('# (FAIL: could not find build target for %s)' % line)
                     dependencies.append("#%s" % line)
