@@ -78,7 +78,8 @@ def get_pants_target_path_for_import(import_statement):
         return None
 
     # verify there is a build target already defined
-    if not import_target_name in open(build_file_path).read():
+    module_name = "name='%s'" % import_target_name
+    if not module_name in open(build_file_path, 'r').read():
         print 'could not find target name %s in build file %s' % (import_target_name, build_file_path)
         return None
 
@@ -156,7 +157,8 @@ def process_dir_for_pants(target_dir, files=None):
         file_infos = []
 
         for file_name in files:
-            file_path = target_dir + '/' + file_name
+            prefix = '%s/' % target_dir
+            file_path = prefix + file_name
             if is_file_for_pants(file_path):
                 file_infos.append(parse_for_pants(file_path))
             else:
