@@ -15,7 +15,7 @@ There are several configuration options found in `build_pants_target_config.py`.
 
 
 ## Usage:
-`$ build_pants_target.py <dir or file>`
+`$ build_pants_target.py <dir or file path>`
 
 ## Structure:
 
