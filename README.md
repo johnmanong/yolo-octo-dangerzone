@@ -11,7 +11,7 @@ If the import statement is not cached, the tool will programatically try to cons
 
 If no build target is found using this strategy, it will simply print the import statement in the build file to assist in manual resolution.
 
-Tool tries to assist with import to target resolution by dropping a comments into the BUILD file. Additionally, if an import statement is found in `target_mapping.py`, it will also add the target path for you.
+There are several configuration options found in `build_pants_target_config.py`.
 
 
 ## Usage:
