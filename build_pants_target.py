@@ -12,6 +12,10 @@ PANTS_TARGET_TEMPLATE = Template(
 
 DOUBLE_DIR_STRUCTURE = True
 
+TARGET_SOURCE_ROOTS = [
+    'third_party'
+]
+
 
 def get_target_for_import(import_statement):
     # split import statement into fragements
@@ -61,6 +65,18 @@ def can_import_from_python(module_name):
     # return True
     return False
 
+
+def find_target_in_build_file(build_file_paths, import_target_name):
+    for build_file_path in build_file_paths:
+        module_name = "name='%s'" % import_target_name
+        # make sure build file exists
+        if os.path.isfile(build_file_path) and module_name in open(build_file_path, 'r').read():
+            print 'Found target %s in build file %s' % (import_target_name, build_file_path)
+            module_path = '/'.join(build_file_path.split('/')[:-1])
+            return module_path
+    return None
+
+
 def get_pants_target_path_for_import(import_statement):
     module_name = get_module_name_for_import(import_statement)
 
@@ -74,29 +90,15 @@ def get_pants_target_path_for_import(import_statement):
     # get module path and name
     module_name_frags = module_name.split('.')
     import_target_name = module_name_frags.pop()
-    module_path = ''
     if module_name_frags:
-        double_root_module_name = module_name_frags
-        double_root_module_name.insert(0, double_root_module_name[0])
-        module_path = '/'.join(double_root_module_name)
+        module_name_frags.insert(0, module_name_frags[0])
 
-    # construct and verify build file
-    build_file_path_frags = module_name_frags
-    build_file_path_frags.append('BUILD')
-    build_file_path = '/'.join(build_file_path_frags)
+    # verify target is in build file
+    sources = [module_name_frags] + [[source, source] for source in TARGET_SOURCE_ROOTS]
+    build_file_paths = ['/'.join(source + ['BUILD']) for source in sources]
+    module_path = find_target_in_build_file(build_file_paths, import_target_name)
 
-    # make sure build file exists
-    if not os.path.isfile(build_file_path):
-        print 'could not find build file at %s' % build_file_path
-        return None
-
-    # verify there is a build target already defined
-    module_name = "name='%s'" % import_target_name
-    if not module_name in open(build_file_path, 'r').read():
-        print 'could not find target name %s in build file %s' % (import_target_name, build_file_path)
-        return None
-
-    return '%s:%s' % (module_path, import_target_name)
+    return '%s:%s' % (module_path, import_target_name) if module_path else None
 
 
 def parse_for_pants(file_path):

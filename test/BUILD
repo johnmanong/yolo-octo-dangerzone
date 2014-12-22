@@ -21,5 +21,7 @@ python_library(
         #from middleware import PdbMiddleware
         # (SUCCESS: found build target) from test_module.test_module_file import test_module_method
         'test_module/test_module:test_module_file',
+        # (SUCCESS: found build target) from some_third_party_module import something
+        'third_party/third_party:some_third_party_module',
     ]
 )
