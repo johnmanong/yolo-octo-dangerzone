@@ -3,18 +3,8 @@ import autopep8
 import argparse
 import os
 import re
-from string import Template
-from target_mapping import PANTS_TARGET_MAPPING
-
-
-PANTS_TARGET_TEMPLATE = Template(
-    '\npython_library(\nname = $name,\nsources = [$sources],\ndependencies=[\n$dependencies\n]\n)\n')
-
-DOUBLE_DIR_STRUCTURE = True
-
-TARGET_SOURCE_ROOTS = [
-    'third_party'
-]
+from build_pants_target_config import PANTS_TARGET_MAPPING, PANTS_TARGET_TEMPLATE, \
+    DOUBLE_DIR_STRUCTURE, TARGET_SOURCE_ROOTS
 
 
 def get_target_for_import(import_statement):
@@ -94,7 +84,7 @@ def get_pants_target_path_for_import(import_statement):
         module_name_frags.insert(0, module_name_frags[0])
 
     # verify target is in build file
-    sources = [module_name_frags] + [[source, source] for source in TARGET_SOURCE_ROOTS]
+    sources = [module_name_frags] + [source.split('/') for source in TARGET_SOURCE_ROOTS]
     build_file_paths = ['/'.join(source + ['BUILD']) for source in sources]
     module_path = find_target_in_build_file(build_file_paths, import_target_name)
 
