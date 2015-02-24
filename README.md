@@ -5,6 +5,11 @@ yolo-octo-dangerzone
 
 Command line tool for generating pants BUILD files. If a BUILD file already exists, it will append script output to the end of the file.
 
+This tool will try to resolve import statement in the file(s) to build targets. Each import processed will get a SUCCESS/FAIL annotation in the generated build tool.
+
+
+## details
+
 Tool will first look in a static cache (`target_mapping.py`) to revolve import statements into build targets.
 
 If the import statement is not cached, the tool will programatically try to construct the build target path from the import statement. Tool assumes you are running the script from the project root and that module directories are wrapping in a directory of the same name.
@@ -15,12 +20,13 @@ There are several configuration options found in `build_pants_target_config.py`.
 
 
 ## Usage:
-`$ build_pants_target.py <dir or file path>`
+`$ ./build_toolds/pants/build_pants_target.py some/directory/which/needs/pants/`
+`$ ./build_toolds/pants/build_pants_target.py some/file/which/needs/pants.py`
 
 ## Structure:
 
     |-- build_pants_target.py: build script
-    |-- target_mapping.py: dict with common mappings between import statements and target paths
+    |-- build_pants_target_config.py: module which holds config variables.
 
 ## Testing
-Run build script with current directory = `test`
+Run build script with current directory = `test` and inspect output

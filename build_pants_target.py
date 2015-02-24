@@ -45,15 +45,11 @@ def can_import_from_python(module_name):
     Utility method to check if import can come from python lib and not virtual env
     """
     try:
-        # WIP
-        # print '>>>>>>>>>>>>>>>>>>>>>>>>>'
-        # print module_name
+        # TODO consider: __import__(module_name)
         os.path.abspath(__import__(module_name).__file__)
-        # __import__(module_name)
     except (AttributeError, ImportError):
         return False
 
-    # return True
     return False
 
 
