@@ -22,8 +22,8 @@ You will need autopep8 installed:
     `pip install -r autopep8`
 
 ## Usage:
-    $ ./build_tools/pants/build_pants_target.py some/directory/which/needs/pants/
-    $ ./build_tools/pants/build_pants_target.py some/file/which/needs/pants.py
+    $ build_pants_target.py some/directory/which/needs/pants/
+    $ build_pants_target.py some/file/which/needs/pants.py
 
 
 ## Structure:
