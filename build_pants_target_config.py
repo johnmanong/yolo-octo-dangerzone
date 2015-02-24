@@ -7,7 +7,7 @@ from string import Template
 
 """
 PANTS_TARGET_MAPPING = {
-  'django_pdb.utils': 'test/path/to:target',
+    'django_pdb.utils': 'test/path/to:target',
 }
 
 

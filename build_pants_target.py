@@ -8,7 +8,7 @@ from build_pants_target_config import PANTS_TARGET_MAPPING, PANTS_TARGET_TEMPLAT
 
 
 def get_target_for_import(import_statement):
-    # split import statement into fragements
+    # split import statement into fragments
     frags = import_statement.split(' ')
 
     # remove non-module keywords
@@ -38,6 +38,7 @@ def get_module_name_for_import(import_statement):
         print 'died trying to get module name for import statement: %s ' % import_statement
 
     return None
+
 
 def can_import_from_python(module_name):
     """
@@ -80,7 +81,7 @@ def get_pants_target_path_for_import(import_statement):
     # get module path and name
     module_name_frags = module_name.split('.')
     import_target_name = module_name_frags.pop()
-    if module_name_frags:
+    if module_name_frags and DOUBLE_DIR_STRUCTURE:
         module_name_frags.insert(0, module_name_frags[0])
 
     # verify target is in build file
@@ -122,7 +123,7 @@ def parse_for_pants(file_path):
                     dependencies.append('# (PASS: found was able to import) %s' % line)
                 else:
                     dependencies.append('# (FAIL: could not find build target for %s)' % line)
-                    dependencies.append("#%s" % line)
+                    dependencies.append("# %s" % line)
 
     return {
         'name': file_name,
@@ -177,17 +178,13 @@ def process_dir_for_pants(target_dir, files=None):
 
 def process_files_for_pants(file_target):
     if os.path.isfile(file_target):
-        dir = os.path.dirname(file_target)
+        dirname = os.path.dirname(file_target)
         files = [os.path.basename(file_target)]
-        process_dir_for_pants(target_dir=dir, files=files)
+        process_dir_for_pants(target_dir=dirname, files=files)
     elif os.path.isdir(file_target):
         process_dir_for_pants(file_target)
     else:
-        logger('Cannot process argument %s', file_target)
-
-
-
-
+        print('Cannot process argument %s', file_target)
 
 # get as arg
 parser = argparse.ArgumentParser()
